@@ -1,0 +1,296 @@
+#+Title:  Pretty Printer
+#+Author: Nicolas Rolland
+#+Email: 
+#+OPTIONS: toc:nil reveal_center:t reveal_progress:t reveal_history:nil reveal_control:t reveal_background: #FFFFFF
+#+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:f num:nil
+#+REVEAL_PLUGINS: (highlight markdown notes)
+
+
+
+* Imprimer
+
+#+ATTR_REVEAL: :frag (roll-in roll-in roll-in)
+- Une structure de donnee (un arbre, une pile, /quelque
+  chose/...)
+- On a une valeur, on souhaite la montrer au monde
+- Contexte d'impression ?
+
+
+#+ATTR_REVEAL: :frag (roll-in)
+*let's try it*
+   
+#+BEGIN_NOTES
+- impression directe
+- on se construit un petit language
+- permet d'avoir plusieurs styles
+- main.hs
+#+END_NOTES
+
+* Document Abstrait
+
+** Frontiere d'abstraction
+
+#+ATTR_REVEAL: :frag (roll-in roll-in roll-in)
+- concept => type abstrait  
+- implementation => type concret
+- language riche : creer des data type, lambda combiner. 
+
+
+** Frontiere d'abstraction en F#
+   
+#+ATTR_REVEAL: :frag (roll-in)
+#+BEGIN_SRC fsharp
+type Union =
+    private
+    | CaseA of int
+    | CaseB of string
+#+END_SRC
+
+#+ATTR_REVEAL: :frag (roll-in)
+#+BEGIN_SRC fsharp
+type ValidString private (value: string) =
+#+END_SRC
+
+#+ATTR_REVEAL: :frag (roll-in)
+#+BEGIN_SRC fsharp
+type AngularSpeed =
+    struct
+        val Speed : float
+    end
+
+    private new (speed) = { Speed = speed; }
+#+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
++ types prives et "smart constructors" dans le module ou signature file
++ quantification universelle (facile) ou existentielle (douloureuse)
+
+
+** Document 
+:PROPERTIES:
+   :reveal_background: #ffffff
+:END:      
+#+ATTR_REVEAL: :frag (roll-in)
+#+BEGIN_SRC haskell
+(<>) ::Doc->Doc->Doc 
+nil :: Doc
+text :: String -> Doc 
+line :: Doc
+nest ::Int->Doc->Doc
+#+END_SRC
+
+
+#+ATTR_REVEAL: :frag (roll-in)
+#+BEGIN_SRC haskell
+layout :: Doc -> String
+#+END_SRC
+
+
+   
+#+BEGIN_NOTES
+- description des differentes operations 
+- (text "\n") ou line ? interne ou externe a librairie ? il y a plusieurs poss
+- contexte : internalise a doc.
+- main.hs
+#+END_NOTES
+
+#+ATTR_REVEAL: :frag (roll-in)
+*let's try it*
+
+* Document concret
+  
+** 1 - representation = liste de caracteres 
+
+#+BEGIN_NOTES
+type uniforme : "" = [char]
+#+END_NOTES
+
+#+ATTR_REVEAL: :frag (roll-in)
+*let's try it*
+
+
+   
+#+BEGIN_NOTES
+- lib0.hs
+- plusieurs styles
+#+END_NOTES
+
+
+** 2 - representation = forme normale capturee par syntaxe
+
+#+ATTR_REVEAL: :frag (roll-in roll-in roll-in roll-in roll-in)
+- garde structure identifiee comme stable 
+- cree une syntaxe pour elle
+- rend ses parametres accessibles
+- profit ! expressivite
+- profit ! fonctions **deduites**..
+
+
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC text
+text s0 <> 
+(nest i1 line <> text s1) <>
+···                       <> 
+(nest ik line <> text sk)
+#+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
+*let's try it*
+
+   
+#+BEGIN_NOTES
+- lib1.hs
+- nest i (j `Line` x) = (i+j) `Line` nest i x 
+  on a explicite les parametres, on a plus de controle, 
+  les parametres ont plus de signification
+- la forme normale s'exprime en terme d'abstraction..
+#+END_NOTES
+
+
+* Smart layout
+
+S'adapter a l'ecran
+
+#+ATTR_REVEAL: :frag (roll-in roll-in roll-in roll-in)
+changer notre representation interne? no pb, merci l'opacite !
+
+** Abstraction change
+
+- group operator
+- pretty function !
+
+
+
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC haskell
+group (
+    group (
+      group (
+        group (text "hello" <> line <> text "a")
+      <> line <> text "b")
+    <> line <> text "c")
+  <> line <> text "d")
+#+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC haskell
+hello a b c  hello a b  hello a    hello
+             c          b          a
+                        c          b
+                                   c
+#+END_SRC
+
+
+** Abstraction change ?
+
+#+ATTR_REVEAL: :frag roll-in
+- alternative operator 
+  #+BEGIN_SRC haskell
+  <|> :: Doc -> Doc -> Doc
+  #+END_SRC
+- flatten
+  #+BEGIN_SRC haskell
+  flatten :: Doc -> Doc
+  #+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
+Tous les Docs ne sont pas acceptables en argument 
+#+ATTR_REVEAL: :frag roll-in
+=> operateur prive
+
+
+#+ATTR_REVEAL: :frag roll-in
+forme normale ?
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC text
+x1 <|> ··· <|> xn,
+where each xj is in the normal form
+#+END_SRC
+
+
+** representation : liste
+
+Liste de Docs
+
+*let's try it*
+
+   
+#+BEGIN_NOTES
+- main2.hs
+- mon abstraction s'appelle Docs
+- Lib2.hs
+- chaque Docs est un ensemble non vide de document
+- produit cartesien, ordre whatever, ca vient de l'entree
+- tres tres inefficace, 100 choix => 2^100 entrees
+#+END_NOTES
+
+
+** representation : take 2
+
+
+#+ATTR_REVEAL: :frag roll-in
+- rassembler les parties communes
+- ordonner par ordre croissant de 1e ligne : " x<|>y : every first line in x is at least as long as every first line in y"
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC haskell
+group (
+    group (
+      group (
+        group (text "hello" <> line <> text "a")
+      <> line <> text "b")
+    <> line <> text "c")
+  <> line <> text "d")
+#+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC haskell
+hello a b c  hello a b  hello a    hello
+             c          b          a
+                        c          b
+                                   c
+#+END_SRC
+
+#+ATTR_REVEAL: :frag roll-in
+#+BEGIN_SRC haskell
+ "hello" ‘Text‘ ((" " ‘Text‘ x) ‘Union‘ (0 ‘Line‘ y))
+#+END_SRC
+
+
+** representation : forme normale capturee par syntaxe
+
+
+*let's try it*
+
+
+
+
+* orga
+
+imprimer
+document abstrait : 
+implementation
+layout multiple
+
+
+client
+
+---
+
+semantique exposee
+
+-- 
+
+semantique avec invariant
+
+-- 
+
+structure de donnee
+
+* Forme normale
+
+Doc -> forme normale (via lois)
+on exprime les operations sur les formes normales
+produit un document
+reductible en forme normales
+
+on a deduit les implementations

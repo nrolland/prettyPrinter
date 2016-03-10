@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Pretty Printer</title>
+<meta name="author" content="(Nicolas Rolland)"/>
+
+<link rel="stylesheet" href="./reveal.js/css/reveal.css"/>
+<link rel="stylesheet" href="./reveal.js/css/theme/moon.css" id="theme"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = './reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1>Pretty Printer</h1>
+<h2>Nicolas Rolland</h2>
+<h2><a href="mailto:"></a></h2>
+<h2></h2>
+</section>
+
+
+
+<section>
+<section id="slide-sec-1">
+<h2 id="sec-1">Imprimer</h2>
+<ul>
+<li class="fragment roll-in">Une structure de donnee (un arbre, une pile, <i>quelque
+chose</i>&#x2026;)</li>
+<li class="fragment roll-in">On a une valeur, on souhaite la montrer au monde</li>
+<li class="fragment roll-in">Contexte d'impression ?</li>
+
+</ul>
+
+
+<span class="fragment (roll-in)"><p>
+<b>let's try it</b>
+</p></span>
+
+<aside class="notes">
+<ul class="org-ul">
+<li>impression directe
+</li>
+<li>on se construit un petit language
+</li>
+<li>permet d'avoir plusieurs styles
+</li>
+<li>main.hs
+</li>
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-sec-2">
+<h2 id="sec-2">Document Abstrait</h2>
+<div class="outline-text-2" id="text-2">
+</div></section>
+<section id="slide-sec-2-1">
+<h3 id="sec-2-1">Frontiere d'abstraction</h3>
+<ul>
+<li class="fragment roll-in">concept =&gt; type abstrait</li>
+<li class="fragment roll-in">implementation =&gt; type concret</li>
+<li class="fragment roll-in">language riche : creer des data type, lambda combiner.</li>
+
+</ul>
+
+
+</section>
+<section id="slide-sec-2-2">
+<h3 id="sec-2-2">Frontiere d'abstraction en F#</h3>
+<div class="org-src-container">
+
+<pre  class="fragment (roll-in)">type Union =
+    private
+    | CaseA of int
+    | CaseB of string
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment (roll-in)">type ValidString private (value: string) =
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment (roll-in)">type AngularSpeed =
+    struct
+        val Speed : float
+    end
+
+    private new (speed) = { Speed = speed; }
+</pre>
+</div>
+
+<ul class="fragment roll-in">
+<li>types prives et "smart constructors" dans le module ou signature file</li>
+<li>quantification universelle (facile) ou existentielle (douloureuse)</li>
+
+</ul>
+
+
+</section>
+<section id="slide-sec-2-3" data-background="#ffffff">
+<h3 id="sec-2-3">Document</h3>
+<div class="org-src-container">
+
+<pre  class="fragment (roll-in)">(<span style="color: #a40000;">&lt;&gt;</span>) <span style="color: #b35000;">::</span><span style="color: #204a87;">Doc</span><span style="color: #b35000;">-&gt;</span><span style="color: #204a87;">Doc</span><span style="color: #b35000;">-&gt;</span><span style="color: #204a87;">Doc</span> 
+<span style="color: #a40000;">nil</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">Doc</span>
+<span style="color: #a40000;">text</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">String</span> <span style="color: #b35000;">-&gt;</span> <span style="color: #204a87;">Doc</span> 
+<span style="color: #a40000;">line</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">Doc</span>
+<span style="color: #a40000;">nest</span> <span style="color: #b35000;">::</span><span style="color: #204a87;">Int</span><span style="color: #b35000;">-&gt;</span><span style="color: #204a87;">Doc</span><span style="color: #b35000;">-&gt;</span><span style="color: #204a87;">Doc</span>
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre  class="fragment (roll-in)"><span style="color: #a40000;">layout</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">Doc</span> <span style="color: #b35000;">-&gt;</span> <span style="color: #204a87;">String</span>
+</pre>
+</div>
+
+
+
+<aside class="notes">
+<ul class="org-ul">
+<li>description des differentes operations 
+</li>
+<li>(text "\n") ou line ? interne ou externe a librairie ? il y a plusieurs poss
+</li>
+<li>contexte : internalise a doc.
+</li>
+<li>main.hs
+</li>
+</ul>
+
+</aside>
+
+<span class="fragment (roll-in)"><p>
+<b>let's try it</b>
+</p></span>
+
+</section>
+</section>
+<section>
+<section id="slide-sec-3">
+<h2 id="sec-3">Document concret</h2>
+<div class="outline-text-2" id="text-3">
+</div></section>
+<section id="slide-sec-3-1">
+<h3 id="sec-3-1">1 - representation = liste de caracteres</h3>
+<aside class="notes">
+<p>
+type uniforme : "" = [char]
+</p>
+
+</aside>
+
+<span class="fragment (roll-in)"><p>
+<b>let's try it</b>
+</p></span>
+
+
+
+<aside class="notes">
+<ul class="org-ul">
+<li>lib0.hs
+</li>
+<li>plusieurs styles
+</li>
+</ul>
+
+</aside>
+
+
+</section>
+<section id="slide-sec-3-2">
+<h3 id="sec-3-2">2 - representation = forme normale capturee par syntaxe</h3>
+<ul>
+<li class="fragment roll-in">garde structure identifiee comme stable</li>
+<li class="fragment roll-in">cree une syntaxe pour elle</li>
+<li class="fragment roll-in">rend ses parametres accessibles</li>
+<li class="fragment roll-in">profit ! expressivite</li>
+<li class="fragment roll-in">profit ! fonctions <b><b>deduites</b></b>..</li>
+
+</ul>
+
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in">text s0 &lt;&gt; 
+(nest i1 line &lt;&gt; text s1) &lt;&gt;
+&#183;&#183;&#183;                       &lt;&gt; 
+(nest ik line &lt;&gt; text sk)
+</pre>
+</div>
+
+<span class="fragment roll-in"><p>
+<b>let's try it</b>
+</p></span>
+
+
+<aside class="notes">
+<ul class="org-ul">
+<li>lib1.hs
+</li>
+<li>nest i (j `Line` x) = (i+j) `Line` nest i x 
+on a explicite les parametres, on a plus de controle, 
+les parametres ont plus de signification
+</li>
+<li>la forme normale s'exprime en terme d'abstraction..
+</li>
+</ul>
+
+</aside>
+
+
+</section>
+</section>
+<section>
+<section id="slide-sec-4">
+<h2 id="sec-4">Smart layout</h2>
+<p>
+S'adapter a l'ecran
+</p>
+
+<span class="fragment (roll-in roll-in roll-in roll-in)"><p>
+changer notre representation interne? no pb, merci l'opacite !
+</p></span>
+
+</section>
+<section id="slide-sec-4-1">
+<h3 id="sec-4-1">Abstraction change</h3>
+<ul>
+<li>group operator</li>
+<li>pretty function !</li>
+
+</ul>
+
+
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #a40000;">group</span> (
+    group (
+      group (
+        group (text <span style="color: #5c3566;">"hello"</span> <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"a"</span>)
+      <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"b"</span>)
+    <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"c"</span>)
+  <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"d"</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #a40000;">hello</span> a b c  hello a b  hello a    hello
+             c          b          a
+                        c          b
+                                   c
+</pre>
+</div>
+
+
+</section>
+<section id="slide-sec-4-2">
+<h3 id="sec-4-2">Abstraction change ?</h3>
+<ul class="fragment roll-in">
+<li>alternative operator 
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #b35000;">&lt;|&gt;</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">Doc</span> <span style="color: #b35000;">-&gt;</span> <span style="color: #204a87;">Doc</span> <span style="color: #b35000;">-&gt;</span> <span style="color: #204a87;">Doc</span>
+</pre>
+</div></li>
+<li>flatten
+<div class="org-src-container">
+
+<pre  class="src src-haskell"><span style="color: #a40000;">flatten</span> <span style="color: #b35000;">::</span> <span style="color: #204a87;">Doc</span> <span style="color: #b35000;">-&gt;</span> <span style="color: #204a87;">Doc</span>
+</pre>
+</div></li>
+
+</ul>
+
+<span class="fragment roll-in"><p>
+Tous les Docs ne sont pas acceptables en argument 
+</p></span>
+<span class="fragment roll-in"><p>
+=&gt; operateur prive
+</p></span>
+
+
+<span class="fragment roll-in"><p>
+forme normale ?
+</p></span>
+<div class="org-src-container">
+
+<pre  class="fragment roll-in">x1 &lt;|&gt; &#183;&#183;&#183; &lt;|&gt; xn,
+where each xj is in the normal form
+</pre>
+</div>
+
+
+</section>
+<section id="slide-sec-4-3">
+<h3 id="sec-4-3">Implementation change</h3>
+<p>
+Liste de Docs
+</p>
+
+<p>
+<b>let's try it</b>
+</p>
+
+
+<aside class="notes">
+<ul class="org-ul">
+<li>main2.hs
+</li>
+<li>mon abstraction s'appelle Docs
+</li>
+<li>Lib2.hs
+</li>
+<li>chaque Docs est un ensemble non vide de document
+</li>
+<li>produit cartesien, ordre whatever, ca vient de l'entree
+</li>
+<li>tres tres inefficace, 100 choix =&gt; 2<sup>100</sup> entrees
+</li>
+</ul>
+
+</aside>
+
+
+</section>
+<section id="slide-sec-4-4">
+<h3 id="sec-4-4">Implementation change take 2</h3>
+<ul class="fragment roll-in">
+<li>rassembler les parties communes</li>
+<li>ordonner par ordre croissant de 1e ligne : " every first line in x is at least as long as every first line in y"</li>
+
+</ul>
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #a40000;">group</span> (
+    group (
+      group (
+        group (text <span style="color: #5c3566;">"hello"</span> <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"a"</span>)
+      <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"b"</span>)
+    <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"c"</span>)
+  <span style="color: #b35000;">&lt;&gt;</span> line <span style="color: #b35000;">&lt;&gt;</span> text <span style="color: #5c3566;">"d"</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #a40000;">hello</span> a b c  hello a b  hello a    hello
+             c          b          a
+                        c          b
+                                   c
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #5c3566;">"hello"</span> <span style="color: #b35000;">&#8216;</span><span style="color: #204a87;">Text</span><span style="color: #b35000;">&#8216;</span> ((<span style="color: #5c3566;">" "</span> <span style="color: #b35000;">&#8216;</span><span style="color: #204a87;">Text</span><span style="color: #b35000;">&#8216;</span> x) <span style="color: #b35000;">&#8216;</span><span style="color: #204a87;">Union</span><span style="color: #b35000;">&#8216;</span> (0 <span style="color: #b35000;">&#8216;</span><span style="color: #204a87;">Line</span><span style="color: #b35000;">&#8216;</span> y))
+</pre>
+</div>
+
+
+</section>
+</section>
+<section>
+<section id="slide-sec-5">
+<h2 id="sec-5">orga</h2>
+<p>
+imprimer
+document abstrait : 
+implementation
+layout multiple
+</p>
+
+
+<p>
+client
+</p>
+
+<p>
+&#x2014;
+</p>
+
+<p>
+semantique exposee
+</p>
+
+<p>
+&#x2013; 
+</p>
+
+<p>
+semantique avec invariant
+</p>
+
+<p>
+&#x2013; 
+</p>
+
+<p>
+structure de donnee
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-sec-6">
+<h2 id="sec-6">Forme normale</h2>
+<p>
+Doc -&gt; forme normale (via lois)
+on exprime les operations sur les formes normales
+produit un document
+reductible en forme normales
+</p>
+
+<p>
+on a deduit les implementations
+</p>
+</section>
+</section>
+</div>
+</div>
+
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: true,
+rollingLinks: true,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+ { src: './reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+]
+});
+</script>
+</body>
+</html>
